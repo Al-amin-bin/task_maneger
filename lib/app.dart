@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:task_app/ControllerBinders.dart';
 import 'package:task_app/UI/Scrrens/splash_screen.dart';
 
 class TaskApp extends StatelessWidget {
@@ -8,7 +10,7 @@ class TaskApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       navigatorKey:  TaskApp.navigatorKey,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -41,6 +43,7 @@ class TaskApp extends StatelessWidget {
           )
         )
       ),
+      initialBinding: ControllerBinder(),
 
       home: SplashScreen(),
     );
