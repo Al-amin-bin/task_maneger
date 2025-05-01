@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:task_app/UI/controller/progress_task_controller.dart';
 import 'package:task_app/UI/widgets/showSnacbar.dart';
 import 'package:task_app/UI/widgets/task_card.dart';
 import 'package:task_app/data/Service/network_client.dart';
@@ -14,8 +16,7 @@ class ProgressTaskScreen extends StatefulWidget {
 }
 
 class _ProgressTaskScreenState extends State<ProgressTaskScreen> {
-  List<TaskModel> _progressList = [];
-  bool _progressListInProgress = false;
+  ProgressTaskController _progressTaskController = Get.find<ProgressTaskController>();
   @override
   void initState() {
     getProgressList();
@@ -24,31 +25,30 @@ class _ProgressTaskScreenState extends State<ProgressTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.separated(
-          itemCount: _progressList.length,
-          itemBuilder: (context, index){
-            return TaskCard(taskStatus: TaskStatus.progress, taskModel: _progressList[index], refreshList: getProgressList,);
-          },
-          separatorBuilder: (context, index){
-            return SizedBox(height: 4,);
-          }, ),
+      body: GetBuilder<ProgressTaskController>(
+        builder: (controller) {
+          return Visibility(
+            visible: controller.progressListInProgress == false,
+            replacement: Center(child: CircularProgressIndicator(),),
+            child: ListView.separated(
+                itemCount: controller.progressList.length,
+                itemBuilder: (context, index){
+                  return TaskCard(taskStatus: TaskStatus.progress, taskModel: controller.progressList[index], refreshList: getProgressList,);
+                },
+                separatorBuilder: (context, index){
+                  return SizedBox(height: 4,);
+                }, ),
+          );
+        }
+      ),
     );
   }
   
   Future<void> getProgressList()async{
-    _progressListInProgress = true;
-    setState(() {
-    });
-    NetworkResponse response =await NetworkClient.getRequest(url: Urls.progressListUrl);
-    if(response.isSuccess){
-      TaskListModel taskListModel = TaskListModel.fromJson(response.data!);
-      _progressList = taskListModel.taskList;
-    }else{
-      showSnackBarMessage(context, response.errorMassage);
-    }
-    _progressListInProgress = false;
-    setState(() {
-    });
+   bool isSuccess = await _progressTaskController.getProgressTaskList();
+   if(!isSuccess){
+     showSnackBarMessage(context, _progressTaskController.errorMassage!);
+   }
     
   }
 }
